@@ -1,0 +1,19 @@
+# Fichier contenant les variables d'environnement (clés API, etc.)
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.so
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environment
+.venv/
+venv/
+ENV/
