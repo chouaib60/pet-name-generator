@@ -1,45 +1,46 @@
-import os
-from pathlib import Path
-from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.prompts import PromptTemplate
-from langchain_core.runnables import Runnable
+import langchain_helper as lh  # Importer le module langchain_helper
+import streamlit as st  # importer streamlit pour créer l'interface utilisateur web
 
-# Charger les variables d'environnement (comme GOOGLE_API_KEY)
-load_dotenv()
+st.set_page_config(page_title="Pet Name Generator", page_icon="🐾")
 
-def namePet(animal_type, couleur):
-    """Génère un nom de pet en fonction du type d'animal et de la couleur"""
-    
-    # Initialiser le modèle Google Generative AI
-    LLM = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.9)
-    
-    # Appliquer les prompt templates
-    prompt_template = PromptTemplate(
-        input_variables=["animal_type", "couleur"],
-        template="J'ai un {animal_type} de couleur {couleur}, donne-moi un bon nom mignon pour mon pet. Donne uniquement le nom, sans explication."
-    )
-    
-    # Appliquer la chaîne pour combiner le prompt template et le modèle IA
-    # LLM est une instance du modèle ChatGoogleGenerativeAI
-    # prompt_template est une instance de PromptTemplate
-    name_chain = prompt_template | LLM
-    
-    # Générer la réponse
-    response = name_chain.invoke({"animal_type": animal_type, "couleur": couleur})
-    
-    return response.content
+st.title("🐾 Générateur de noms de pets")
 
-# Exemple d'utilisation
-if __name__ == "__main__":
-    print("🐾 Générateur de noms de pets avec Google Generative AI\n")
-    
-    # Exemple 1
-    animal_type = "chat"
-    couleur = "orange"
-    print(f"Génération d'un nom pour: {animal_type} {couleur}")
-    print("-" * 40)
-    result = namePet(animal_type, couleur)
-    print(f"✅ Nom généré: {result}\n")
-    
-    
+# Entrées utilisateur dans la sidebar
+animal_type = st.sidebar.selectbox(
+    "C'est quoi votre animal ?", 
+    ("chat", "chien", "vache", "hamster")
+)
+
+couleur = st.sidebar.text_input("Couleur de l'animal ?", placeholder="ex: orange, noir, blanc...")
+
+# Bouton pour générer le nom
+if st.sidebar.button("Générer un nom mignon pour mon pet 🎉"):
+    if couleur.strip() == "":
+        st.warning("⚠️ Veuillez entrer la couleur de l'animal")
+    else:
+        # Afficher un spinner pendant la génération
+        with st.spinner("⏳ Génération en cours..."):
+            try:
+                # Appeler la fonction namePet du module langchain_helper
+                name = lh.namePet(animal_type, couleur)
+                
+                # Afficher le résultat
+                st.success(f"✅ Nom généré avec succès !")
+                st.markdown(f"## 🎁 Voici un super nom pour votre {animal_type} {couleur} :")
+                st.markdown(f"### **{name}**")
+                
+                # Ajouter un ballon et des emojis pour célébrer
+                st.balloons()
+                
+            except Exception as e:
+                st.error(f"❌ Erreur lors de la génération : {e}")
+
+# Ajouter des informations dans la sidebar
+st.sidebar.markdown("---")
+st.sidebar.markdown("""
+### 📝 Comment ça marche ?
+1. Sélectionnez le type d'animal
+2. Entrez la couleur
+3. Cliquez sur le bouton
+4. Obtenez un nom mignon ! 🎉
+""")
